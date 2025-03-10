@@ -14,7 +14,7 @@ def aptitud(individuo):
         aux += individuo[i]*(i**2)
     return aux
 
-def ruleta(poblacion):
+def ruleta_max(poblacion):
     aptitudes = [aptitud(individuo) for individuo in poblacion]
     aptitud_total = sum(aptitudes)
     
@@ -33,6 +33,35 @@ def ruleta(poblacion):
         if aleatorio <= acumulado:
             return poblacion[i]
             
+
+def ruleta_min(poblacion):
+    # Calcular aptitudes originales
+    aptitudes = [aptitud(individuo) for individuo in poblacion]
+    
+    # Invertir aptitudes para minimización
+    max_apt = max(aptitudes)  # Encuentra la máxima aptitud
+    aptitudes_invertidas = [max_apt - apt + 1 for apt in aptitudes]  # Transformación para invertir valores
+    
+    aptitud_total = sum(aptitudes_invertidas)
+    
+    # Calcular probabilidades basadas en aptitudes invertidas
+    probabilidades = [apt / aptitud_total for apt in aptitudes_invertidas]
+    
+    print("\nIndividuos: ", *poblacion, sep="\n\t")
+    print("\nAptitudes originales (minimizar): ", aptitudes)
+    print("\nAptitudes invertidas: ", aptitudes_invertidas)
+    print("\nProbabilidades:", *probabilidades, sep="\n\t")
+    
+    aleatorio = random.random()
+    print("\nNúmero aleatorio entre 0 y 1 = ", aleatorio)
+    
+    acumulado = 0
+    for i, probabilidad in enumerate(probabilidades):
+        acumulado += probabilidad
+        if aleatorio <= acumulado:
+            return poblacion[i]
+
+
 
     #se añaden los parametros "Tiradas" para controlar las veces que se ejecuta 
     #la ruleta y ganador con un valor predeterminado de none en caso de que sea 
