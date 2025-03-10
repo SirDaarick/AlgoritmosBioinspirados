@@ -1,11 +1,11 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import math
 global TAM_POBLACION
 global N_ALELOS
 TAM_POBLACION = 100  
 N_ALELOS = 25
-
 
 class Poblacion:
     def __init__(self):
@@ -229,6 +229,39 @@ def cruzaNpuntos(pareja, fraccion):
     nuevo_hijo1.cromosoma = hijo1
     nuevo_hijo2.cromosoma = hijo2
     return [nuevo_hijo1, nuevo_hijo2]
+
+def a_columnas(cromosoma, n):
+    columna = []
+    for i in range(0, n):
+        for j in range(0,n**2,n):
+            columna.append(cromosoma[i+j])
+    return columna
+
+def decodificar(cromosoma, n):
+    n_regla = math.ceil(n/2)
+    reglas = []
+
+    for j in range(0, n**2, n):
+        regla = []
+        n_unos = 0
+        for i in range (0, n):
+            if cromosoma[i+j]==1:
+                n_unos += 1
+            else:
+                if n_unos == 0:
+                    continue
+                else:
+                    regla.append(n_unos)
+                    n_unos = 0
+        if n_unos > 0:
+            regla.append(n_unos)
+        
+        while len(regla) < n_regla:
+            regla.append(0)
+        
+        reglas.append(regla)
+    print(reglas)
+    return reglas
 
 reglas_r = [(0,0,3), (0,0,5), (1,1,1), (0,0,5), (0,1,1)]
 reglas_c = [(0,0,3), (0,2,2), (0,0,4), (0,2,2), (0,0,3)]
