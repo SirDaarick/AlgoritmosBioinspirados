@@ -1,15 +1,15 @@
 import random
 import math
-cromosoma = [0,1,1,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0]
+cromosoma = []
 n = 5
 n_alelos = n**2
 n_reglas = math.ceil(n/2)
 
-#for i in range(0,n_alelos):
-#    cromosoma.append(random.randint(0,1))
+for i in range(0,n_alelos):
+    cromosoma.append(random.randint(0,1))
 
-#print(cromosoma)
-#print(len(cromosoma))
+print(cromosoma)
+print(len(cromosoma))
 
 def a_columnas(cromosoma, n):
     columna = []
@@ -46,7 +46,25 @@ def decodificar(cromosoma, n):
     print(reglas)
     return reglas
 
-decodificar(cromosoma, n)
 
-#print(a_columnas(cromosoma, n))
-decodificar(a_columnas(cromosoma,n),n)
+
+perfecta = [0,1,1,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0]
+reglas_r = decodificar(perfecta, n)
+reglas_c = decodificar(a_columnas(perfecta, n), n)
+
+def nonograma(individuo, reglas_r, reglas_c, n):
+    renglones = individuo
+    columnas = a_columnas(individuo, n)
+    deco_r = decodificar(renglones, n)
+    deco_c = decodificar(columnas, n)
+    errores_r, errores_c = 0 , 0 
+    n_reglas = math.ceil(n/2)
+    
+    for i in range(0,n):
+        for j in range(0,n_reglas):
+            errores_r += abs(reglas_r[i][j]-deco_r[i][j])
+            errores_c += abs(reglas_c[i][j]-deco_c[i][j])
+    error = errores_r + errores_c
+    return error
+
+print(nonograma(cromosoma, reglas_r, reglas_c, n))

@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import math
 global TAM_POBLACION
 global N_ALELOS
-TAM_POBLACION = 100  
-N_ALELOS = 25
+global N 
+TAM_POBLACION = 400
+N = 10
+N_ALELOS = N**2
 
 class Poblacion:
     def __init__(self):
@@ -43,7 +45,7 @@ class Individuo:
 
     def __repr__(self):
         return f"Individuo({self.cromosoma}, Aptitud: {self.aptitud})"
-    
+
 
 #Falta recibir semilla random
 
@@ -52,7 +54,7 @@ def algoritmoGenetico(TAM_POBLACION, pCruza, pMuta, max_generaciones=1000):
     poblacion = Poblacion()
     poblacion.poblacion = generaPoblacion(TAM_POBLACION)
     poblacion.evaluaPoblacion()
-    print("\nPoblacion", *poblacion.poblacion, "\n")
+    #print("\nPoblacion", *poblacion.poblacion, "\n")
     generacion = 0  # Contador de generaciones
     mejor, peor, promedio = [], [], []
 
@@ -81,19 +83,21 @@ def algoritmoGenetico(TAM_POBLACION, pCruza, pMuta, max_generaciones=1000):
         
         generacion += 1  # Incrementar el número de generaciones
 
-        print(f"Generación {generacion}")
-        print("Mejor individuo: ", poblacion.mejorIndividuo())
-        print("Aptitud del mejor individuo: ", poblacion.mejorIndividuo().aptitud)
-        print("Promedio de aptitud de la población: ", poblacion.promedioAptitud(), "\n")
+        print(f"Generación {generacion}\t Mejor Individuo {poblacion.mejorIndividuo().aptitud} \t Promedio aptitud {poblacion.promedioAptitud()}",)
+        #print("Mejor individuo: ", poblacion.mejorIndividuo())
+        #print("Aptitud del mejor individuo: ", poblacion.mejorIndividuo().aptitud)
+        #print("Promedio de aptitud de la población: ", poblacion.promedioAptitud(), "\n")
 
         if poblacion.mejorIndividuo().aptitud == 0:
+            print(poblacion.mejorIndividuo())
             break
 
         if poblacion.mejorIndividuo() == poblacion.peorIndividuo(): #Criterio de paro 2
+            print("Se perdio la diversidad genetica de la poblacion")
             break
     
     graficar(mejor, peor, promedio)
-    print("Finalizó el algoritmo por límite de generaciones.")
+    print("Finalizó el algoritmo")
 
 def graficar(mejores, peores, promedios):
     generaciones = list(range(1, len(mejores) + 1))
@@ -116,40 +120,56 @@ def generaPoblacion(tam_pob):
 
 #Nonograma
 #NOTA: se debe de poder decodificar en reglas para verificarlas que funcionan
-def nonograma(individuo, reglas_r, reglas_c):
-    nr = len(reglas_r)
-    qr = len(reglas_r[0])
-    nc = len(reglas_c)
-    qc = len(reglas_c[0])
+def nonograma(individuo, reglas_r, reglas_c, n):
+    renglones = individuo
+    columnas = a_columnas(individuo, n)
+    deco_r = decodificar(renglones, n)
+    deco_c = decodificar(columnas, n)
+    errores_r, errores_c = 0 , 0 
+    n_reglas = math.ceil(n/2)
     
-    if len(individuo) != nr * nc:
-        raise ValueError(f"la longitud de la cadena debe ser de {nr*nc}")
-    
-    matriz = []
-    
-    for i in range(0, 25, 5):
-        renglon = individuo[i:i+5]
-        matriz.append(renglon)
-        
-    for regla in reglas_r:
-        for condicion in reversed(regla):
-            if condicion == 0:
-                break
-            
-    
-    
-    
+    for i in range(0,n):
+        for j in range(0,n_reglas):
+            errores_r += abs(reglas_r[i][j]-deco_r[i][j])
+            errores_c += abs(reglas_c[i][j]-deco_c[i][j])
+    error = errores_r + errores_c
+    return error
 
-def obtener_columna(matriz, columna):
-    columna = [fila[columna] for fila in matriz]
-    return columna
 
 
 def aptitud(individuo):
-    aux = 0
-    for i in range(len(individuo.cromosoma)):
-        aux += individuo.cromosoma[i]*(i**2)
-    return aux
+    #5X5 mejores parametros 0.7, 0.3
+    #reglas_r = [(0,0,3), (0,0,5), (1,1,1), (0,0,5), (0,1,1)]
+    #reglas_c = [(0,0,3), (0,2,2), (0,0,4), (0,2,2), (0,0,3)]
+    
+    #10X10 mejores parametros 0.5, 0.3 con 400 de poblacion
+    reglas_r = [
+        [0, 0, 0, 0, 10],
+        [0, 0, 0, 3, 3],
+        [0, 2, 1, 1, 2],
+        [0, 1, 1, 1, 1],
+        [0, 0, 0, 1, 1],
+        [0, 1, 1, 1, 1],
+        [0, 0, 1, 4, 1],
+        [0, 0, 2, 2, 2],
+        [0, 0, 0, 3, 3],
+        [0, 0, 0, 0, 10]
+    ]
+
+    reglas_c = [
+        [0, 0, 0, 0, 10],
+        [0, 0, 0, 3, 3],
+        [0, 0, 2, 1, 2],
+        [0, 1, 2, 1, 1], #quizas es 1121
+        [0, 0, 1, 2, 1],
+        [0, 0, 1, 2, 1],
+        [0, 1, 2, 1, 1],
+        [0, 0, 2, 1, 2],
+        [0, 0, 0, 3, 3],
+        [0, 0, 0, 0, 10]
+    ]
+
+    return nonograma(individuo.cromosoma, reglas_r, reglas_c, N) 
 
 def cruzaUnPunto(pareja):
     pCruza = random.randint(1, len(pareja[0].cromosoma) - 1)
@@ -179,13 +199,13 @@ def ruleta_min(poblacion):
     # Calcular probabilidades basadas en aptitudes invertidas
     probabilidades = [apt / aptitud_total for apt in aptitudes_invertidas]
     
-    print("\nIndividuos: ", *poblacion, sep="\n\t")
-    print("\nAptitudes originales (minimizar): ", aptitudes)
-    print("\nAptitudes invertidas: ", aptitudes_invertidas)
-    print("\nProbabilidades:", *probabilidades, sep="\n\t")
+    #print("\nIndividuos: ", *poblacion, sep="\n\t")
+    #print("\nAptitudes originales (minimizar): ", aptitudes)
+    #print("\nAptitudes invertidas: ", aptitudes_invertidas)
+    #print("\nProbabilidades:", *probabilidades, sep="\n\t")
     
     aleatorio = random.random()
-    print("\nNúmero aleatorio entre 0 y 1 = ", aleatorio)
+    #print("\nNúmero aleatorio entre 0 y 1 = ", aleatorio)
     
     acumulado = 0
     for i, probabilidad in enumerate(probabilidades):
@@ -203,7 +223,7 @@ def calcularFraccion(n, longitud_cromosoma):
 def cruzaNpuntos(pareja, fraccion):
     longitud_cromosoma = len(pareja[0].cromosoma)
     n = min(calcularFraccion(fraccion, longitud_cromosoma), longitud_cromosoma - 2)
-    print(n)
+    #print(n)
     puntos = sorted(random.sample(range(1, longitud_cromosoma-1), n))
     
     hijo1 = []
@@ -257,15 +277,11 @@ def decodificar(cromosoma, n):
             regla.append(n_unos)
         
         while len(regla) < n_regla:
-            regla.append(0)
+            regla.insert(0,0)
         
         reglas.append(regla)
-    print(reglas)
+    #print(reglas)
     return reglas
 
-reglas_r = [(0,0,3), (0,0,5), (1,1,1), (0,0,5), (0,1,1)]
-reglas_c = [(0,0,3), (0,2,2), (0,0,4), (0,2,2), (0,0,3)]
 
-
-
-algoritmoGenetico(10, 0.5, 0.2, 1000)
+algoritmoGenetico(TAM_POBLACION, 0.6, 0.3, 100000)
